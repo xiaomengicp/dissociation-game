@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three Days</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-normal: #fafaf8;
+            --bg-stress: #f5f3ef;
+            --bg-dissociation: #1a1a1a;
+            --bg-autopilot: #f0f0ed;
+            
+            --text-normal: #2a2a2a;
+            --text-muted: #6a6a6a;
+            --text-faint: #9a9a9a;
+            --text-dissociation: #e0e0e0;
+            
+            --accent: #8b7355;
+            --danger: #a65d57;
+            --safe: #5d7a6a;
+            
+            --transition-slow: 1.2s ease;
+            --transition-normal: 0.4s ease;
+        }
+        
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background-color: var(--bg-normal);
+            color: var(--text-normal);
+            min-height: 100vh;
+            transition: background-color var(--transition-slow), color var(--transition-slow);
+            line-height: 1.9;
+            font-weight: 300;
+        }
+        
+        body.stress {
+            background-color: var(--bg-stress);
+        }
+        
+        body.dissociation {
+            background-color: var(--bg-dissociation);
+            color: var(--text-dissociation);
+        }
+        
+        body.autopilot {
+            background-color: var(--bg-autopilot);
+            color: var(--text-muted);
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header / Status */
+        .header {
+            margin-bottom: 60px;
+            opacity: 0.7;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        
+        .time-indicator {
+            font-weight: 400;
+        }
+        
+        .status-line {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .narrative {
+            font-size: 17px;
+            margin-bottom: 50px;
+            line-height: 2.2;
+        }
+        
+        .narrative p {
+            margin-bottom: 1.5em;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        .narrative p:nth-child(1) { animation-delay: 0.2s; }
+        .narrative p:nth-child(2) { animation-delay: 0.5s; }
+        .narrative p:nth-child(3) { animation-delay: 0.8s; }
+        .narrative p:nth-child(4) { animation-delay: 1.1s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Choices */
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .choice {
+            background: transparent;
+            border: 1px solid var(--text-faint);
+            padding: 16px 24px;
+            font-family: inherit;
+            font-size: 15px;
+            color: inherit;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-align: left;
+            opacity: 0;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        .choice:nth-child(1) { animation-delay: 1.2s; }
+        .choice:nth-child(2) { animation-delay: 1.35s; }
+        .choice:nth-child(3) { animation-delay: 1.5s; }
+        .choice:nth-child(4) { animation-delay: 1.65s; }
+        .choice:nth-child(5) { animation-delay: 1.8s; }
+        
+        .choice:hover {
+            border-color: var(--text-normal);
+            padding-left: 30px;
+        }
+        
+        .choice.prominent {
+            border-width: 2px;
+            font-weight: 400;
+        }
+        
+        .choice.muted {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+        
+        .choice.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-style: dotted;
+        }
+        
+        .choice.disabled:hover {
+            padding-left: 24px;
+            border-color: var(--text-faint);
+        }
+        
+        /* Dissociation specific styles */
+        body.dissociation .choice {
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        body.dissociation .choice:hover {
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Fragments (dissociation state) */
+        .fragments-container {
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding: 40px;
+        }
+        
+        .fragment {
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 16px;
+            color: var(--text-dissociation);
+            cursor: pointer;
+            padding: 15px 25px;
+            opacity: 0;
+            animation: float 4s ease-in-out infinite, fragmentFadeIn 1s ease forwards;
+            transition: all var(--transition-normal);
+        }
+        
+        .fragment:nth-child(1) { animation-delay: 0.3s, 0s; }
+        .fragment:nth-child(2) { animation-delay: 0.6s, 0.5s; }
+        .fragment:nth-child(3) { animation-delay: 0.9s, 1s; }
+        .fragment:nth-child(4) { animation-delay: 1.2s, 1.5s; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes fragmentFadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.7; }
+        }
+        
+        .fragment:hover {
+            opacity: 1;
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+        
+        .fragment.anchor-fragment {
+            color: #667;
+        }
+        
+        .fragment.anchor-fragment:hover {
+            color: #889;
+        }
+        
+        .fragment.fading {
+            animation: fragmentFadeOut 0.8s ease forwards;
+        }
+        
+        @keyframes fragmentFadeOut {
+            to { opacity: 0; transform: scale(0.9); }
+        }
+        
+        /* Time display during dissociation */
+        .time-passing {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+            font-family: monospace;
+        }
+        
+        /* Status cards */
+        .status-cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .status-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: rgba(0,0,0,0.02);
+            border-left: 2px solid var(--text-faint);
+        }
+        
+        .status-card-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .status-card-value {
+            font-size: 14px;
+        }
+        
+        /* Warning hint */
+        .warning-hint {
+            font-size: 13px;
+            color: var(--danger);
+            opacity: 0.8;
+            margin-top: 30px;
+            font-style: italic;
+        }
+        
+        /* Safe exit */
+        .safe-exit {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 12px;
+            color: var(--text-faint);
+            text-decoration: none;
+            padding: 10px 15px;
+            border: 1px solid transparent;
+            transition: all var(--transition-normal);
+            cursor: pointer;
+            background: none;
+            font-family: inherit;
+        }
+        
+        .safe-exit:hover {
+            border-color: var(--text-faint);
+        }
+        
+        body.dissociation .safe-exit {
+            color: rgba(255,255,255,0.3);
+        }
+        
+        /* Ending screen */
+        .ending {
+            text-align: center;
+        }
+        
+        .ending h2 {
+            font-weight: 400;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        
+        .ending-summary {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+        
+        /* Autopilot visual effect */
+        body.autopilot .narrative {
+            opacity: 0.7;
+        }
+        
+        body.autopilot .choice {
+            letter-spacing: 0.5px;
+        }
+        
+        /* Screen transitions */
+        .screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .screen.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        /* Title screen */
+        .title-screen {
+            text-align: center;
+            padding-top: 30vh;
+        }
+        
+        .title-screen h1 {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 10px;
+        }
+        
+        .title-screen .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 60px;
+        }
+        
+        .title-screen .start-btn {
+            background: none;
+            border: 1px solid var(--text-normal);
+            padding: 15px 40px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .title-screen .start-btn:hover {
+            background: var(--text-normal);
+            color: var(--bg-normal);
+        }
+        
+        /* Safe exit overlay */
+        .safe-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(250,250,248,0.98);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .safe-overlay.active {
+            display: flex;
+        }
+        
+        .safe-content {
+            max-width: 400px;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .safe-content p {
+            margin-bottom: 20px;
+            line-height: 2;
+        }
+        
+        .safe-content .return-btn {
+            margin-top: 30px;
+            background: none;
+            border: 1px solid var(--text-normal);
+            padding: 12px 30px;
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+        }
+        
+        .safe-content .return-btn:hover {
+            background: var(--text-normal);
+            color: var(--bg-normal);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title Screen -->
+        <div class="screen title-screen active" id="title-screen">
+            <h1>Three Days</h1>
+            <p class="subtitle">A game about getting through</p>
+            <button class="start-btn" onclick="startGame()">Start</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div class="screen" id="game-screen">
+            <div class="header">
+                <span class="time-indicator" id="time-indicator">周一 · 早上</span>
+                <span class="status-line" id="status-line"></span>
+            </div>
+            
+            <div class="main-content">
+                <div class="status-cards" id="status-cards"></div>
+                <div class="narrative" id="narrative"></div>
+                <div class="choices" id="choices"></div>
+                <div class="warning-hint" id="warning-hint"></div>
+            </div>
+        </div>
+        
+        <!-- Dissociation Screen -->
+        <div class="screen" id="dissociation-screen">
+            <div class="time-passing" id="time-passing"></div>
+            <div class="main-content">
+                <div class="narrative" id="dissociation-narrative"></div>
+                <div class="fragments-container" id="fragments"></div>
+                <div class="choices" id="dissociation-choices"></div>
+            </div>
+        </div>
+        
+        <!-- Ending Screen -->
+        <div class="screen ending" id="ending-screen">
+            <div class="main-content">
+                <h2 id="ending-title"></h2>
+                <div class="ending-summary" id="ending-summary"></div>
+                <button class="choice" onclick="location.reload()">Play again</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Safe Exit Button -->
+    <button class="safe-exit" id="safe-exit" onclick="showSafeExit()">Pause</button>
+    
+    <!-- Safe Exit Overlay -->
+    <div class="safe-overlay" id="safe-overlay">
+        <div class="safe-content">
+            <p>You can pause.</p>
+            <p>You don't need to prove you can handle it.</p>
+            <p style="color: var(--text-muted); font-size: 14px;">
+                If you want:<br>
+                Look at three objects around you<br>
+                Feel your feet on the ground<br>
+                Breathe in, breathe out
+            </p>
+            <p>You can come back anytime.</p>
+            <button class="return-btn" onclick="hideSafeExit()">Return to game</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GAME STATE
+        // ============================================
+        const state = {
+            // Time
+            day: 1,
+            timeSlot: 0, // 0=早上, 1=下午, 2=晚上
+            
+            // 恢复合理的初始数值
+            energy: 7,
+            stress: 2,
+            dissociationThreshold: 7,
+            
+            // Progress lines
+            workProgress: 0,
+            workRequired: 3,
+            relationshipStatus: 1, // 从"有点疏远"开始
+            relationshipNeglect: 0, // 给玩家至少一个回合的工作机会
+            familyPressure: 0,
+            familyIgnored: 0,
+            
+            // 锚点需要通过行动获得
+            anchors: {
+                breath: { strength: 0, cooldown: 0, name: 'Breathing' },
+                person: { strength: 0, cooldown: 0, name: 'Someone' },
+                place: { strength: 0, cooldown: 0, name: 'Safe place' }
+            },
+            
+            // States
+            inDissociation: false,
+            autopilotMode: false,
+            dissociationCount: 0,
+            consecutiveAvoid: 0,
+            
+            // Dissociation
+            dissociationDepth: 0,
+            timePassedInDissociation: 0,
+            lastStressSource: null
+        };
+        
+        const DAYS = ['Monday', 'Tuesday', 'Wednesday'];
+        const TIME_SLOTS = ['Morning', 'Afternoon', 'Evening'];
+        
+        // ============================================
+        // NARRATIVE CONTENT
+        // ============================================
+        
+        const dayIntros = {
+            1: {
+                0: {
+                    text: () => `<p>A new week.</p>
+                           <p>You wake up, check your phone. A few messages, a work reminder.</p>
+                           <p>Something due Wednesday. Still time.</p>`,
+                    statusUpdate: true
+                },
+                1: {
+                    text: () => {
+                        let t = `<p>Afternoon.</p>
+                               <p>Time keeps moving.${state.workProgress === 0 ? ' Haven\'t started on that work thing.' : ''}</p>`;
+                        if (state.stress >= 5) {
+                            t += `<p style="opacity: 0.7;">Your chest feels tight. Maybe you need to breathe.</p>`;
+                        }
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Phone lights up. Another missed call from home.</p>`;
+                        }
+                        return t;
+                    }
+                },
+                2: {
+                    text: () => {
+                        let t = `<p>Evening.</p>
+                               <p>Day's almost over. Two days left.</p>`;
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Those missed calls are still there. No energy to call back.</p>`;
+                        }
+                        return t;
+                    }
+                }
+            },
+            2: {
+                0: {
+                    text: () => {
+                        if (state.familyPressure === 0) state.familyPressure = 1;
+                        let t = `<p>Tuesday.</p>
+                               <p>Yesterday feels far away.</p>
+                               <p>${state.workProgress === 0 ? 'Haven\'t started on that work thing.' : `Work progress: ${state.workProgress}/${state.workRequired}.`}</p>`;
+                        if (state.familyPressure >= 1) {
+                            t += `<p style="opacity: 0.7;">Family called last night. You didn't pick up.</p>`;
+                        }
+                        return t;
+                    }
+                },
+                1: {
+                    text: () => {
+                        let t = `<p>Afternoon.</p>
+                               <p>Phone buzzes. Could be them, could be work.</p>`;
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Another call from home. You glance at it, put it down.</p>`;
+                        }
+                        return t;
+                    }
+                },
+                2: {
+                    text: () => {
+                        let t = `<p>Evening.</p>
+                               <p>Tomorrow is Wednesday. Deadline.</p>`;
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Missed calls: ${state.familyPressure}. You know you can't avoid it much longer.</p>`;
+                        }
+                        return t;
+                    }
+                }
+            },
+            3: {
+                0: {
+                    text: () => {
+                        let t = `<p>Wednesday.</p>
+                               <p>It's today.</p>
+                               <p>${state.workProgress < state.workRequired ? `Work progress: ${state.workProgress}/${state.workRequired}. Still need ${state.workRequired - state.workProgress} more.` : 'Work is done. At least that\'s off your mind.'}</p>`;
+                        if (state.familyPressure >= 3) {
+                            t += `<p style="opacity: 0.7;">Family has called ${state.familyPressure} times. You know you have to call back today.</p>`;
+                        }
+                        return t;
+                    }
+                },
+                1: {
+                    text: () => {
+                        let t = `<p>Afternoon.</p>
+                               <p>${state.workProgress < state.workRequired ? 'Time is running out.' : 'Work submitted. Relief.'}</p>`;
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Phone lights up again. Family.</p>`;
+                        }
+                        return t;
+                    }
+                },
+                2: {
+                    text: () => {
+                        let t = `<p>Evening.</p>
+                               <p>Almost over.</p>`;
+                        if (state.familyPressure >= 2) {
+                            t += `<p style="opacity: 0.7;">Those missed calls are still there.</p>`;
+                        }
+                        return t;
+                    }
+                }
+            }
+        };
+        
+        // Energy descriptions
+        function getEnergyText() {
+            if (state.energy <= 2) return 'Exhausted. Every move feels heavy.';
+            if (state.energy <= 4) return 'A bit tired.';
+            if (state.energy <= 6) return 'Okay.';
+            return 'Energy is fine.';
+        }
+        
+        // Stress warning (only when close to threshold)
+        function getStressWarning() {
+            if (state.stress >= state.dissociationThreshold - 1) {
+                const warnings = [
+                    'Something feels off.',
+                    'Your breathing is shallow.',
+                    'Something is building up.'
+                ];
+                return warnings[Math.floor(Math.random() * warnings.length)];
+            }
+            return '';
+        }
+        
+        // Work status text
+        function getWorkStatusText() {
+            const remaining = state.workRequired - state.workProgress;
+            if (state.day === 3 && remaining > 0) {
+                if (remaining >= 2) return `Not going to make it. Still need ${remaining} units. This thought won't go away.`;
+                return `Almost there. Still need ${remaining} unit.`;
+            }
+            if (state.workProgress === 0) return `Haven't started. Need ${state.workRequired} units.`;
+            if (remaining > 0) return `Progress: ${state.workProgress}/${state.workRequired}. Still need ${remaining}.`;
+            return 'Done. At least this is off your mind.';
+        }
+        
+        // Relationship status text
+        function getRelationshipStatusText() {
+            if (state.relationshipStatus === 0) {
+                return 'Their messages are getting shorter. Last one was just "ok".';
+            }
+            if (state.relationshipStatus === 1) {
+                if (state.relationshipNeglect >= 2) {
+                    return `${state.relationshipNeglect} messages without a real conversation.`;
+                }
+                return 'You haven\'t really talked in a while.';
+            }
+            return 'Their recent messages make you feel held.';
+        }
+        
+        // Family status text
+        function getFamilyStatusText() {
+            if (state.familyPressure === 0) return 'Nothing from home lately.';
+            if (state.familyPressure === 1) return 'Something going on with family. You know you\'ll have to deal with it.';
+            if (state.familyPressure === 2) return 'Missed calls: 2. You know ignoring it will make it worse.';
+            return `Missed calls: ${state.familyPressure}. Heart races every time you see it.`;
+        }
+        
+        // ============================================
+        // ACTIONS
+        // ============================================
+        
+        const actions = {
+            work: {
+                label: () => {
+                    const remaining = state.workRequired - state.workProgress;
+                    if (remaining <= 0) return 'Work (Done)';
+                    return `Do work (${remaining} left)`;
+                },
+                energy: -2,
+                stress: 2,
+                effect: () => { 
+                    state.workProgress++; 
+                    state.lastStressSource = 'work';
+                    const remaining = state.workRequired - state.workProgress;
+                    
+                    state.relationshipNeglect++;
+                    let extraText = '';
+                    if (state.relationshipNeglect >= 2 && state.relationshipStatus > 0) {
+                        state.relationshipStatus--;
+                        extraText = ' They sent a message. You didn\'t reply.';
+                    }
+                    
+                    if (state.workProgress === 1) {
+                        return `You sit down, try to focus. Hard. But you start. Progress: 1/${state.workRequired}.${extraText}`;
+                    }
+                    if (remaining === 0) {
+                        return 'Finally done. You can let this go.' + extraText;
+                    }
+                    return `Made some progress. ${state.workProgress}/${state.workRequired}.${extraText}`;
+                },
+                available: () => state.energy >= 2 && state.workProgress < state.workRequired
+            },
+            seePartner: {
+                label: () => {
+                    if (state.relationshipStatus === 0) return 'Reply to them';
+                    if (state.relationshipStatus === 1) return 'Reply to them';
+                    return 'See them';
+                },
+                energy: -1,
+                stress: () => {
+                    if (state.stress > 6) return 2;
+                    if (state.relationshipStatus >= 2) return -1;
+                    return Math.random() > 0.5 ? -1 : 1;
+                },
+                effect: () => {
+                    state.lastStressSource = 'relationship';
+                    
+                    if (state.stress > 6 || state.dissociationCount > 1) {
+                        state.relationshipStatus = Math.max(0, state.relationshipStatus - 1);
+                        state.relationshipNeglect++;
+                        return 'You wanted comfort, but you\'re too irritable. You argued. They went quiet, closed the door. You feel worse.';
+                    }
+                    
+                    state.relationshipNeglect = 0;
+                    
+                    if (state.relationshipStatus === 0) {
+                        if (Math.random() > 0.5) {
+                            state.relationshipStatus = 1;
+                            return 'You talked. They said "I just want you to reply." It stung, but at least you\'re talking.';
+                        }
+                        return 'You replied. They just said "ok".';
+                    }
+                    if (state.relationshipStatus === 1) {
+                        if (Math.random() > 0.4) {
+                            state.relationshipStatus = 2;
+                            if (state.anchors.person.strength < 3) {
+                                state.anchors.person.strength++;
+                            }
+                            return 'You talked for a long time. They said "I\'m here." You felt held.';
+                        }
+                        return 'You talked a bit. Nothing deep, but talking.';
+                    }
+                    if (state.anchors.person.strength < 3) {
+                        state.anchors.person.strength++;
+                    }
+                    return 'You spent time together. No need for many words. This is the easiest moment of the day.';
+                },
+                available: () => state.energy >= 1
+            },
+            family: {
+                label: () => {
+                    if (state.familyPressure >= 3) return `Call family back (${state.familyPressure} missed)`;
+                    if (state.familyPressure >= 2) return 'Call family back (2 missed)';
+                    return 'Deal with family stuff';
+                },
+                energy: -2,
+                stress: () => Math.min(5, state.familyPressure + 3),
+                effect: () => {
+                    state.lastStressSource = 'family';
+                    const oldPressure = state.familyPressure;
+                    // Handling reduces pressure but doesn't reset completely
+                    state.familyPressure = Math.max(0, state.familyPressure - 2);
+                    state.familyIgnored = 0;
+                    
+                    state.relationshipNeglect++;
+                    let extraText = '';
+                    if (state.relationshipNeglect >= 2 && state.relationshipStatus > 0) {
+                        state.relationshipStatus--;
+                        extraText = ' Their message still unread.';
+                    }
+                    
+                    if (oldPressure >= 3) {
+                        return 'You picked up. The voice on the other end was heavy. You listened, responded. When it ended, you were shaking. Heart took a long time to settle.' + extraText;
+                    }
+                    if (oldPressure >= 2) {
+                        return 'You picked up. Familiar voice, familiar pressure. You needed to lie down after.' + extraText;
+                    }
+                    return 'You dealt with the family thing. Not too heavy, but it took energy.' + extraText;
+                },
+                available: () => state.energy >= 2 && state.familyPressure > 0
+            },
+            rest: {
+                label: 'Rest',
+                energy: 2,
+                stress: () => {
+                    if (state.workProgress < state.day) return 1;
+                    return -1;
+                },
+                effect: () => {
+                    state.lastStressSource = null;
+                    if (state.workProgress < state.day) {
+                        return 'You lie down, but your mind won\'t stop. Work is still waiting.';
+                    }
+                    
+                    if (state.anchors.place.strength === 0 && Math.random() > 0.7) {
+                        state.anchors.place.strength = 1;
+                        return 'You found a quiet corner. Light just right, temperature just right. You remembered this feeling. Maybe it\'ll help next time.';
+                    }
+                    if (state.anchors.place.strength > 0 && state.anchors.place.strength < 3 && Math.random() > 0.6) {
+                        state.anchors.place.strength++;
+                        return 'You went back to that corner. Each time, it\'s easier to find that quiet.';
+                    }
+                    
+                    const results = [
+                        'You lie down, do nothing. Time slows a little.',
+                        'You sit by the window, looking out. Not thinking.',
+                        'You close your eyes, let yourself stop. It helps a little.'
+                    ];
+                    return results[Math.floor(Math.random() * results.length)];
+                },
+                available: () => true
+            },
+            breathPractice: {
+                label: () => {
+                    if (state.anchors.breath.cooldown > 0) return 'Breathing (cooling down)';
+                    return 'Breathing practice';
+                },
+                energy: 0,
+                stress: -2,
+                effect: () => {
+                    state.lastStressSource = null;
+                    state.anchors.breath.cooldown = 2;
+                    
+                    if (state.anchors.breath.strength === 0) {
+                        state.anchors.breath.strength = 1;
+                        return 'You count your breaths. In, out. Hard to focus. But you\'re practicing. Maybe it\'ll help next time.';
+                    }
+                    if (state.anchors.breath.strength < 3) {
+                        state.anchors.breath.strength++;
+                    }
+                    if (state.anchors.breath.strength === 2) {
+                        return 'You count your breaths. Easier than last time. World gets quieter.';
+                    }
+                    return 'You count your breaths. This practice is familiar now. It helps.';
+                },
+                available: () => state.anchors.breath.cooldown === 0
+            },
+            avoid: {
+                label: 'Stay in, ignore messages',
+                energy: 0,
+                stress: -1,
+                effect: () => {
+                    state.consecutiveAvoid++;
+                    state.relationshipNeglect++;
+                    
+                    let result = 'You shut yourself in. Quiet for now.';
+                    
+                    if (state.consecutiveAvoid >= 2) {
+                        if (state.relationshipStatus > 0) {
+                            state.relationshipStatus--;
+                        }
+                        result = 'You hid again. But things outside won\'t disappear.';
+                    }
+                    return result;
+                },
+                available: () => true,
+                prominent: () => state.stress > 5
+            }
+        };
+        
+        // ============================================
+        // EVENTS
+        // ============================================
+        
+        const events = {
+            peaceful: {
+                text: 'A peaceful moment. No messages, nothing happening.',
+                effect: () => {},
+                weight: (day) => day === 1 ? 2 : 0.5
+            },
+            sunshine: {
+                text: 'Sun is nice. You stood by the window for a moment. It helped a little.',
+                effect: () => { state.stress = Math.max(0, state.stress - 1); },
+                weight: (day) => day === 1 ? 1.5 : 0.3
+            },
+            cat: {
+                text: 'A cat on the street. It looked at you, then walked away.',
+                effect: () => { state.stress = Math.max(0, state.stress - 1); },
+                weight: (day) => 0.5
+            },
+            workReminder: {
+                text: () => {
+                    const remaining = state.workRequired - state.workProgress;
+                    if (remaining <= 0) return 'Reminder: Wednesday deadline. Already done.';
+                    if (state.day === 3) return `Reminder: Due today. Still need ${remaining}.`;
+                    return `Reminder: Due Wednesday. Still need ${remaining}.`;
+                },
+                effect: () => { 
+                    if (state.workProgress < state.workRequired) {
+                        state.stress += 2;
+                        state.lastStressSource = 'work';
+                    }
+                },
+                weight: (day) => day >= 2 ? 2 : 1
+            },
+            partnerMessage: {
+                text: () => {
+                    if (state.relationshipStatus === 0) return 'They messaged: "Are you okay?" Three words.';
+                    if (state.relationshipStatus === 1) return 'They messaged, asking what you\'re doing.';
+                    return 'They messaged: "Miss you."';
+                },
+                choices: [
+                    { 
+                        label: 'Reply', 
+                        effect: () => { 
+                            state.energy--;
+                            state.relationshipNeglect = Math.max(0, state.relationshipNeglect - 1);
+                            if (state.relationshipStatus >= 2) state.stress--;
+                        } 
+                    },
+                    { 
+                        label: 'Not now', 
+                        effect: () => { 
+                            state.relationshipNeglect++;
+                            state.stress++;
+                            state.lastStressSource = 'relationship';
+                            if (state.relationshipNeglect >= 3 && state.relationshipStatus > 0) {
+                                state.relationshipStatus--;
+                            }
+                        } 
+                    }
+                ],
+                weight: (day) => 2
+            },
+            bump: {
+                text: 'Someone bumped into you on the street. Didn\'t apologize.',
+                effect: () => { 
+                    state.stress += 2; 
+                    state.lastStressSource = 'external';
+                },
+                weight: (day) => day >= 2 ? 1.5 : 0.5
+            },
+            intrusive: {
+                text: () => {
+                    const thoughts = [
+                        'Something came back. From long ago. It just appeared.',
+                        'An image flashed. You didn\'t want to see it, but there it was.',
+                        'Remembered something someone said. Didn\'t mean much then. Heavy now.'
+                    ];
+                    return thoughts[Math.floor(Math.random() * thoughts.length)];
+                },
+                effect: () => { 
+                    state.stress += 2;
+                    state.lastStressSource = 'intrusive';
+                },
+                weight: (day) => day >= 2 ? 2.5 : 1
+            },
+            familyCall: {
+                text: () => {
+                    if (state.familyPressure >= 2) return 'Parents calling again. Call number ' + (state.familyPressure + 1) + '.';
+                    return 'Parents calling.';
+                },
+                choices: [
+                    { 
+                        label: 'Answer', 
+                        effect: () => { 
+                            state.stress += 3 + state.familyPressure; 
+                            state.energy -= 2; 
+                            // Answering reduces pressure but doesn't reset completely
+                            state.familyPressure = Math.max(0, state.familyPressure - 2);
+                            state.familyIgnored = 0;
+                            state.lastStressSource = 'family';
+                        } 
+                    },
+                    { 
+                        label: 'Ignore', 
+                        effect: () => { 
+                            state.stress += 2; 
+                            state.familyPressure++;
+                            state.familyIgnored++;
+                            state.lastStressSource = 'family';
+                        } 
+                    }
+                ],
+                weight: (day) => {
+                    if (state.familyPressure >= 3) return 4;
+                    if (state.familyPressure >= 2) return 3;
+                    return day >= 2 ? 2.5 : 1.5;
+                }
+            },
+            deadlineAnxiety: {
+                text: () => {
+                    if (state.day === 3) return 'Deadline. Today. Heart racing.';
+                    if (state.day === 2) return 'Deadline is tomorrow. Stomach tightening.';
+                    return 'Thinking about Wednesday. Still time. But already anxious.';
+                },
+                effect: () => {
+                    state.stress += state.day;
+                    state.lastStressSource = 'work';
+                },
+                weight: (day) => state.workProgress < state.workRequired ? day * 1.5 : 0
+            },
+            relationshipAnxiety: {
+                text: () => {
+                    if (state.relationshipStatus === 0) return 'You think of them. What they said last time. Chest tight.';
+                    if (state.relationshipNeglect >= 2) return 'You glance at your phone. Still haven\'t replied. It\'s been a while.';
+                    return 'You think of them. Wonder what they\'re doing now.';
+                },
+                effect: () => {
+                    state.stress += state.relationshipNeglect >= 2 ? 2 : 1;
+                    state.lastStressSource = 'relationship';
+                },
+                weight: (day) => state.relationshipNeglect >= 2 ? 2 : 0.5
+            }
+        };
+        
+        function getRandomEvent() {
+            const day = state.day;
+            const available = Object.entries(events).filter(([key, event]) => {
+                if (event.condition && !event.condition()) return false;
+                return true;
+            });
+            
+            const totalWeight = available.reduce((sum, [key, event]) => {
+                return sum + (typeof event.weight === 'function' ? event.weight(day) : event.weight || 1);
+            }, 0);
+            
+            let random = Math.random() * totalWeight;
+            for (const [key, event] of available) {
+                const weight = typeof event.weight === 'function' ? event.weight(day) : event.weight || 1;
+                random -= weight;
+                if (random <= 0) return { key, ...event };
+            }
+            
+            return { key: 'peaceful', ...events.peaceful };
+        }
+        
+        // ============================================
+        // DISSOCIATION CONTENT
+        // ============================================
+        
+        const fragmentPools = {
+            body: ['fingers cold', 'chest tight', 'throat squeezed', 'stomach empty', 'ringing ears', 'breathing shallow', 'skin doesn\'t feel like mine'],
+            emotion: ['fear', 'anger', 'empty', 'numb', 'irritated', 'want to cry but can\'t'],
+            relation: ['that thing they said', 'unread messages', 'did I disappear again', 'they\'ll worry', 'I owe something', 'don\'t pressure me', 'don\'t want to be seen'],
+            time: ['what time is it', 'am I here', 'too clear', 'too far', 'like through glass', 'time stolen', 'don\'t know']
+        };
+        
+        if (state.day >= 2) {
+            fragmentPools.emotion.push('shame', 'grievance');
+        }
+        
+        function getRandomFragments() {
+            const fragments = [];
+            for (const pool of Object.values(fragmentPools)) {
+                fragments.push(pool[Math.floor(Math.random() * pool.length)]);
+            }
+            return fragments.sort(() => Math.random() - 0.5);
+        }
+        
+        const dissociationPaths = {
+            fear: {
+                name: 'Fear',
+                stages: [
+                    {
+                        text: `<p>First you feel: danger.</p>
+                               <p>The danger isn't necessarily outside—but your body doesn't care about that distinction.</p>`,
+                        choices: [
+                            { label: 'Want to run', next: 'fear_escape' },
+                            { label: 'Hide', next: 'fear_hide' },
+                            { label: 'Stare at a point', next: 'fear_freeze' }
+                        ]
+                    }
+                ]
+            },
+            fear_escape: {
+                stages: [
+                    {
+                        text: `<p>You want to leave, but you can't even say what you're leaving.</p>
+                               <p>Your attention narrows, like a rope tightening around the world.</p>`,
+                        choices: [
+                            { label: 'Feet on the ground', next: 'grounding' },
+                            { label: 'I need air', next: 'fear_air' },
+                            { label: 'Keep sinking', next: 'deep' }
+                        ]
+                    }
+                ]
+            },
+            fear_air: {
+                stages: [
+                    {
+                        text: `<p>You took a breath.</p>
+                               <p>But it got stuck halfway.</p>
+                               <p>Suddenly afraid: you might disappear here.</p>`,
+                        choices: 'anchor_check'
+                    }
+                ]
+            },
+            anger: {
+                name: 'Anger',
+                stages: [
+                    {
+                        text: `<p>First you feel: cornered.</p>
+                               <p>You want to push everything away—even if it's care.</p>`,
+                        choices: [
+                            { label: 'Leave me alone', next: 'anger_push' },
+                            { label: 'I\'ve had enough', next: 'anger_enough' },
+                            { label: 'Shut down / disappear', next: 'anger_shutdown', prominent: true }
+                        ]
+                    }
+                ]
+            },
+            anger_shutdown: {
+                stages: [
+                    {
+                        text: `<p>You cut off.</p>
+                               <p>This moment is very quiet.</p>
+                               <p>Quiet feels like victory.</p>
+                               <p>Then you realize: quiet can become vacuum too.</p>`,
+                        choices: [
+                            { label: 'Stay quiet', next: 'deep' },
+                            { label: 'Did I go too far', next: 'anchor_check' }
+                        ]
+                    }
+                ]
+            },
+            anger_enough: {
+                stages: [
+                    {
+                        text: `<p>You're not even sure who you're angry at.</p>
+                               <p>Maybe the deadline.</p>
+                               <p>Maybe "you have to be normal."</p>
+                               <p>Anger has a secret here: it's protecting you from breaking.</p>`,
+                        choices: [
+                            { label: 'Let it stay', next: 'anchor_check' },
+                            { label: 'Turn it into strength', next: 'autopilot_enter' },
+                            { label: 'Keep sinking', next: 'deep' }
+                        ]
+                    }
+                ]
+            },
+            empty: {
+                name: 'Empty',
+                stages: [
+                    {
+                        text: `<p>You don't feel afraid, don't feel angry.</p>
+                               <p>You're just—not here.</p>
+                               <p>World still running, like a machine you haven't logged into.</p>`,
+                        choices: [
+                            { label: 'Watch time pass', next: 'empty_watch' },
+                            { label: 'Am I here', next: 'empty_question' },
+                            { label: 'Too far', next: 'deep' }
+                        ]
+                    }
+                ]
+            },
+            empty_watch: {
+                stages: [
+                    {
+                        text: `<p>You watch time pass.</p>
+                               <p>But you can't feel urgency.</p>
+                               <p>You just watch.</p>`,
+                        choices: [
+                            { label: 'Keep watching', next: 'deep' },
+                            { label: 'Reach out and touch something', next: 'grounding' },
+                            { label: 'Wait', next: 'wait' }
+                        ]
+                    }
+                ]
+            },
+            grounding: {
+                stages: [
+                    {
+                        text: `<p>Your hand touched something real:</p>
+                               <p>Fabric, cup rim, cold floor.</p>
+                               <p>Real isn't emotion.</p>
+                               <p>Real is just: you're still in this world.</p>`,
+                        choices: 'anchor_check'
+                    }
+                ]
+            },
+            deep: {
+                stages: [
+                    {
+                        text: `<p>Text starts breaking.</p>
+                               <p>You're left with just some sentences:</p>
+                               <p>"Don't touch me."</p>
+                               <p>"I'm not here."</p>
+                               <p>"Too late."</p>`,
+                        choices: [
+                            { label: 'I\'m here', next: 'anchor_check', condition: () => hasAnyAnchor() },
+                            { label: 'I don\'t know', next: 'wait' },
+                            { label: 'Wait', next: 'wait' }
+                        ]
+                    }
+                ]
+            },
+            wait: {
+                stages: [
+                    {
+                        text: `<p>You wait.</p>
+                               <p>Don't know what for.</p>
+                               <p>Time moves outside. You're inside.</p>`,
+                        effect: () => { state.timePassedInDissociation += 2; },
+                        choices: [
+                            { label: 'Keep waiting', next: 'wait_more' },
+                            { label: 'Try to come back', next: 'anchor_check' }
+                        ]
+                    }
+                ]
+            },
+            wait_more: {
+                stages: [
+                    {
+                        text: `<p>More time passed.</p>
+                               <p>Slowly, something loosens.</p>
+                               <p>Not because you did anything.</p>
+                               <p>Just—enough time.</p>`,
+                        effect: () => { state.timePassedInDissociation += 2; },
+                        choices: [
+                            { label: 'Come back', next: 'return_slow' }
+                        ]
+                    }
+                ]
+            },
+            autopilot_enter: {
+                stages: [
+                    {
+                        text: `<p>Your emotions went flat.</p>
+                               <p>You can still do things.</p>
+                               <p>But when you do them, you're not in your body.</p>`,
+                        choices: [
+                            { label: 'Finish what needs doing', next: 'return_autopilot' },
+                            { label: 'I don\'t want this', next: 'anchor_check' }
+                        ]
+                    }
+                ]
+            }
+        };
+        
+        function hasAnyAnchor() {
+            return Object.values(state.anchors).some(a => a.strength > 0 && a.cooldown < 2);
+        }
+        
+        function getAvailableAnchors() {
+            return Object.entries(state.anchors)
+                .filter(([key, anchor]) => anchor.strength > 0 && anchor.cooldown < 2)
+                .map(([key, anchor]) => ({ key, ...anchor }));
+        }
+        
+        const anchorTexts = {
+            breath: {
+                1: `<p>You breathe in.</p><p>You count.</p><p>Still floating—but now you have a thread.</p>`,
+                2: `<p>You feel breath entering your chest.</p><p>Edges of the room start to clear.</p>`,
+                3: `<p>Your breathing is like a familiar person, calling you back.</p><p>You don't need to prove anything. You just come back.</p>`,
+                cooldown: `<p>You did it again.</p><p>It's not useless.</p><p>But it's like a door you keep pushing—getting heavier.</p><p>Maybe you need a different anchor.</p>`
+            },
+            person: {
+                1: `<p>You remember something they said.</p><p>Not sure if it was meant for you.</p><p>But you held onto it.</p>`,
+                2: `<p>You remember how they say your name.</p><p>For a moment, you don't feel like a burden.</p>`,
+                3: `<p>You remember them saying: "Here."</p><p>Not a promise.</p><p>A location.</p><p>And that's how you find yourself.</p>`,
+                cold: `<p>You think of them.</p><p>And also: you disappeared last night.</p><p>This anchor pulls you back, but it hurts a little.</p>`
+            },
+            place: {
+                1: `<p>You remember the light in that place.</p><p>Not fully back yet, but you know the way.</p>`,
+                2: `<p>You're almost sitting there.</p><p>Your shoulders drop a little.</p>`,
+                3: `<p>You go back there.</p><p>Finally you can feel: time didn't take you completely.</p>`
+            }
+        };
+        
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+        
+        function updateBodyState() {
+            document.body.className = '';
+            if (state.inDissociation) {
+                document.body.classList.add('dissociation');
+            } else if (state.autopilotMode) {
+                document.body.classList.add('autopilot');
+            } else if (state.stress >= state.dissociationThreshold - 2) {
+                document.body.classList.add('stress');
+            }
+        }
+        
+        function renderGameScreen() {
+            updateBodyState();
+            
+            // Time indicator
+            document.getElementById('time-indicator').textContent = 
+                `${DAYS[state.day - 1]} · ${TIME_SLOTS[state.timeSlot]}`;
+            
+            // Status line (energy only visible)
+            document.getElementById('status-line').textContent = getEnergyText();
+            
+            // Status cards - 始终显示三条线
+            const cardsHtml = `
+                <div class="status-card">
+                    <div class="status-card-title">Work</div>
+                    <div class="status-card-value">${getWorkStatusText()}</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-title">Relationship</div>
+                    <div class="status-card-value">${getRelationshipStatusText()}</div>
+                </div>
+                <div class="status-card">
+                    <div class="status-card-title">Family</div>
+                    <div class="status-card-value">${getFamilyStatusText()}</div>
+                </div>
+            `;
+            document.getElementById('status-cards').innerHTML = cardsHtml;
+            
+            // Warning hint
+            const warning = getStressWarning();
+            document.getElementById('warning-hint').textContent = warning;
+        }
+        
+        function renderNarrative(html) {
+            document.getElementById('narrative').innerHTML = html;
+        }
+        
+        function renderChoices(choicesData) {
+            const container = document.getElementById('choices');
+            container.innerHTML = '';
+            
+            choicesData.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice';
+                btn.textContent = typeof choice.label === 'function' ? choice.label() : choice.label;
+                
+                if (choice.prominent && (typeof choice.prominent === 'function' ? choice.prominent() : choice.prominent)) {
+                    btn.classList.add('prominent');
+                }
+                
+                if (choice.available !== undefined && !choice.available()) {
+                    btn.classList.add('disabled');
+                    btn.title = '你太累了';
+                } else {
+                    btn.onclick = choice.action;
+                }
+                
+                container.appendChild(btn);
+            });
+        }
+        
+        // ============================================
+        // GAME FLOW
+        // ============================================
+        
+        function startGame() {
+            document.getElementById('safe-exit').style.display = 'block';
+            showScreen('game-screen');
+            
+            renderNarrative(`
+                <p>Monday morning.</p>
+                <p>You have work due Wednesday. A relationship to maintain. Family that calls sometimes.</p>
+                <p>Three days.</p>
+                <p>You just need to get through three days.</p>
+            `);
+            
+            renderChoices([
+                { label: 'Begin', action: startTimeSlot }
+            ]);
+        }
+        
+        function startTimeSlot() {
+            // 减少锚点冷却
+            Object.values(state.anchors).forEach(a => {
+                if (a.cooldown > 0) a.cooldown--;
+            });
+            
+            // 每天早上恢复一些能量
+            if (state.timeSlot === 0 && state.day > 1) {
+                state.energy = Math.min(10, state.energy + 3);
+            }
+            
+            // 限制数值范围
+            state.stress = Math.max(0, Math.min(10, state.stress));
+            state.energy = Math.max(0, Math.min(10, state.energy));
+            
+            // 1. 先计算当天的剧情文本（这里面包含了 Day 2 增加家庭压力的逻辑）
+            const intro = dayIntros[state.day][state.timeSlot];
+            const introText = typeof intro.text === 'function' ? intro.text() : intro.text;
+            
+            // 2. 状态更新后再渲染界面
+            renderGameScreen();
+            renderNarrative(introText);
+            
+            // 构建行动选项
+            const choices = Object.entries(actions)
+                .filter(([key, action]) => {
+                    if (key === 'family' && state.familyPressure === 0) return false;
+                    if (key === 'work' && state.workProgress >= state.workRequired) return false;
+                    return true;
+                })
+                .map(([key, action]) => ({
+                    label: typeof action.label === 'function' ? action.label() : action.label,
+                    available: action.available,
+                    prominent: action.prominent,
+                    action: () => doAction(key)
+                }));
+            
+            renderChoices(choices);
+        }
+        
+        function doAction(actionKey) {
+            const action = actions[actionKey];
+            
+            // Apply effects
+            state.energy += action.energy;
+            const stressChange = typeof action.stress === 'function' ? action.stress() : action.stress;
+            state.stress += stressChange;
+            
+            // Clamp values
+            state.energy = Math.max(0, Math.min(10, state.energy));
+            state.stress = Math.max(0, Math.min(10, state.stress));
+            
+            // Reset consecutive avoid if not avoiding
+            if (actionKey !== 'avoid') {
+                state.consecutiveAvoid = 0;
+            }
+            
+            // Get action result text
+            const resultText = action.effect();
+            
+            // 解离触发：压力到阈值 + 随机掷骰
+            // 不是100%触发，给玩家喘息空间
+            let triggerChance = 0;
+            if (state.stress >= state.dissociationThreshold) {
+                triggerChance = 0.6; // 60%几率触发
+                if (state.energy <= 3) triggerChance += 0.2; // 能量低时更容易
+                if (state.stress >= 9) triggerChance += 0.2; // 压力极高时更容易
+            }
+            
+            if (Math.random() < triggerChance) {
+                setTimeout(() => enterDissociation(), 1500);
+                renderNarrative(`<p>${resultText}</p>`);
+                document.getElementById('choices').innerHTML = '';
+                return;
+            }
+            
+            // Otherwise, show result and maybe event
+            showActionResult(resultText);
+        }
+        
+        function showActionResult(resultText) {
+            renderGameScreen();
+            renderNarrative(`<p>${resultText}</p>`);
+            
+            // 事件触发几率提高到70%
+            if (Math.random() > 0.3) {
+                setTimeout(() => triggerEvent(), 1200);
+            } else {
+                renderChoices([{ label: 'Continue', action: advanceTime }]);
+            }
+        }
+        
+        function triggerEvent() {
+            const event = getRandomEvent();
+            const eventText = typeof event.text === 'function' ? event.text() : event.text;
+            
+            renderNarrative(`<p>${eventText}</p>`);
+            
+            if (event.choices) {
+                const choices = event.choices.map(c => ({
+                    label: c.label,
+                    action: () => {
+                        c.effect();
+                        state.stress = Math.max(0, Math.min(10, state.stress));
+                        state.energy = Math.max(0, Math.min(10, state.energy));
+                        
+                        // 解离触发也加随机性
+                        let triggerChance = 0;
+                        if (state.stress >= state.dissociationThreshold) {
+                            triggerChance = 0.6;
+                            if (state.energy <= 3) triggerChance += 0.2;
+                        }
+                        
+                        if (Math.random() < triggerChance) {
+                            setTimeout(() => enterDissociation(), 800);
+                            document.getElementById('choices').innerHTML = '';
+                        } else {
+                            renderGameScreen();
+                            renderChoices([{ label: 'Continue', action: advanceTime }]);
+                        }
+                    }
+                }));
+                renderChoices(choices);
+            } else {
+                if (event.effect) event.effect();
+                state.stress = Math.max(0, Math.min(10, state.stress));
+                state.energy = Math.max(0, Math.min(10, state.energy));
+                
+                // 解离触发也加随机性
+                let triggerChance = 0;
+                if (state.stress >= state.dissociationThreshold) {
+                    triggerChance = 0.6;
+                    if (state.energy <= 3) triggerChance += 0.2;
+                }
+                
+                if (Math.random() < triggerChance) {
+                    setTimeout(() => enterDissociation(), 1200);
+                    document.getElementById('choices').innerHTML = '';
+                } else {
+                    renderGameScreen();
+                    renderChoices([{ label: 'Continue', action: advanceTime }]);
+                }
+            }
+        }
+        
+        function advanceTime() {
+            state.timeSlot++;
+            
+            // === Family pressure keeps building ===
+            // From Day 2, family pressure builds regardless of whether you handled it before
+            if (state.day >= 2) {
+                if (Math.random() < 0.35) {
+                    state.familyPressure++;
+                }
+            }
+            
+            if (state.timeSlot >= 3) {
+                state.timeSlot = 0;
+                state.day++;
+                
+                if (state.day > 3) {
+                    showEnding();
+                    return;
+                }
+            }
+            
+            startTimeSlot();
+        }
+        
+        // ============================================
+        // DISSOCIATION FLOW
+        // ============================================
+        
+        function enterDissociation() {
+            state.inDissociation = true;
+            state.dissociationCount++;
+            state.dissociationDepth = 0;
+            state.timePassedInDissociation = 0;
+            
+            showScreen('dissociation-screen');
+            updateBodyState();
+            
+            document.getElementById('dissociation-narrative').innerHTML = `
+                <p>Your vision narrows.</p>
+                <p>The room hasn't changed, but there's a film between you and it.</p>
+                <p>You want to do something—but "doing" feels suddenly far away.</p>
+                <p style="margin-top: 2em; opacity: 0.5;">Time moves. You don't.</p>
+            `;
+            
+            document.getElementById('fragments').innerHTML = '';
+            
+            renderDissociationChoices([
+                { label: 'Continue', action: showDissociationFragments },
+                { label: 'Pause / Return to breathing', action: showSafeExit }
+            ]);
+            
+            startTimePassingDisplay();
+        }
+        
+        function showDissociationFragments() {
+            state.dissociationDepth++;
+            state.timePassedInDissociation++;
+            
+            const container = document.getElementById('fragments');
+            container.innerHTML = '';
+            
+            document.getElementById('dissociation-narrative').innerHTML = `
+                <p style="opacity: 0.6;">You see words.</p>
+                <p style="opacity: 0.4; margin-top: 1em;">Click on text...</p>
+            `;
+            
+            // 干扰词
+            const noiseWords = ['buzzing', 'blank', 'where is this', 'I\'m not here', 'so far', 'like through glass', 'breaking', 'sinking', 'too far', 'can\'t get back', 'time stolen', 'fingers cold', 'chest tight', 'ringing', 'numb', 'don\'t know'];
+            
+            // 根据深度增加干扰词数量
+            const noiseCount = 5 + state.dissociationDepth * 2;
+            
+            // 收集所有要显示的词
+            const allWords = [];
+            
+            // 添加干扰词
+            for (let i = 0; i < noiseCount; i++) {
+                const word = noiseWords[Math.floor(Math.random() * noiseWords.length)];
+                allWords.push({ text: word, isAnchor: false });
+            }
+            
+            // 锚点 - 只有获得了才出现，视觉上不明显
+            const availableAnchors = [];
+            if (state.anchors.breath.strength > 0 && state.anchors.breath.cooldown <= 1) {
+                availableAnchors.push({ key: 'breath', name: 'breathing' });
+            }
+            if (state.anchors.person.strength > 0 && state.anchors.person.cooldown <= 1) {
+                availableAnchors.push({ key: 'person', name: 'their voice' });
+            }
+            if (state.anchors.place.strength > 0 && state.anchors.place.cooldown <= 1) {
+                availableAnchors.push({ key: 'place', name: 'that corner' });
+            }
+            
+            // 如果有可用锚点，混入词堆里（不明显区分）
+            if (availableAnchors.length > 0) {
+                const anchorsToShow = Math.min(2, availableAnchors.length);
+                for (let i = 0; i < anchorsToShow; i++) {
+                    const anchor = availableAnchors[i];
+                    allWords.push({ text: anchor.name, isAnchor: true, key: anchor.key });
+                }
+            }
+            
+            // 打乱顺序
+            allWords.sort(() => Math.random() - 0.5);
+            
+            // 生成元素，位置更随机
+            allWords.forEach((item, i) => {
+                const el = document.createElement('button');
+                el.className = 'fragment';
+                el.textContent = item.text;
+                
+                // 更随机的位置
+                el.style.left = (Math.random() * 70 + 10) + '%';
+                el.style.top = (Math.random() * 60 + 15) + '%';
+                el.style.fontSize = (Math.random() * 0.6 + 0.85) + 'em';
+                el.style.opacity = (Math.random() * 0.3 + 0.5);
+                el.style.transform = `rotate(${(Math.random() - 0.5) * 10}deg)`;
+                el.style.animationDelay = `${i * 0.15}s`;
+                
+                if (item.isAnchor) {
+                    // 锚点只有很微妙的视觉差异
+                    el.classList.add('anchor-fragment');
+                    el.onclick = () => foundAnchor(item.key);
+                } else {
+                    el.onclick = () => goDeeper();
+                }
+                
+                container.appendChild(el);
+            });
+            
+            document.getElementById('dissociation-choices').innerHTML = '';
+        }
+        
+        function goDeeper() {
+            state.dissociationDepth++;
+            state.timePassedInDissociation++;
+            
+            // 视觉变深
+            const overlay = document.getElementById('dissociation-screen');
+            overlay.style.opacity = Math.max(0.7, 1 - state.dissociationDepth * 0.08);
+            
+            // 检查是否有可用锚点
+            const hasAnchor = Object.values(state.anchors).some(a => a.strength > 0 && a.cooldown <= 1);
+            
+            if (state.dissociationDepth >= 4 && !hasAnchor) {
+                document.getElementById('fragments').innerHTML = '';
+                document.getElementById('dissociation-narrative').innerHTML = `
+                    <p>Too deep.</p>
+                    <p>Nothing to hold onto.</p>
+                    <p>Can only wait.</p>
+                `;
+                renderDissociationChoices([
+                    { label: 'Wait', action: waitAndReturn }
+                ]);
+            } else if (state.dissociationDepth >= 6) {
+                document.getElementById('fragments').innerHTML = '';
+                document.getElementById('dissociation-narrative').innerHTML = `
+                    <p>Too deep.</p>
+                    <p>Even the anchors feel far away.</p>
+                    <p>Can only wait.</p>
+                `;
+                renderDissociationChoices([
+                    { label: 'Wait', action: waitAndReturn }
+                ]);
+            } else {
+                showDissociationFragments();
+            }
+        }
+        
+        function foundAnchor(anchorKey) {
+            const anchor = state.anchors[anchorKey];
+            anchor.cooldown = 2;
+            
+            let text = '';
+            switch(anchorKey) {
+                case 'breath':
+                    text = `<p>You focus on breathing.</p>
+                            <p>In. Out.</p>
+                            <p>The world gets a little clearer.</p>`;
+                    break;
+                case 'person':
+                    text = `<p>You think of them.</p>
+                            <p>Their voice, their face.</p>
+                            <p>For a moment, you don't feel alone.</p>`;
+                    break;
+                case 'place':
+                    text = `<p>You think of that quiet corner.</p>
+                            <p>The light, the temperature, the safety.</p>
+                            <p>You slowly come back there.</p>`;
+                    break;
+            }
+            
+            document.getElementById('fragments').innerHTML = '';
+            document.getElementById('dissociation-narrative').innerHTML = text;
+            
+            renderDissociationChoices([
+                { label: 'Come back', action: () => exitDissociation(false) }
+            ]);
+        }
+        
+        function waitAndReturn() {
+            state.timePassedInDissociation += 2;
+            
+            document.getElementById('dissociation-narrative').innerHTML = `
+                <p>You wait.</p>
+                <p>Don't know what for.</p>
+                <p>Slowly, something loosens.</p>
+                <p>Not because you did anything. Just—enough time passed.</p>
+            `;
+            
+            renderDissociationChoices([
+                { label: 'Come back', action: () => exitDissociation(false) }
+            ]);
+        }
+        
+        function exitDissociation(isAutopilot) {
+            state.inDissociation = false;
+            state.energy = Math.max(0, state.energy - 1);
+            
+            state.stress = Math.min(state.stress, state.dissociationThreshold - 2);
+            
+            document.getElementById('dissociation-screen').style.opacity = 1;
+            
+            state.timeSlot++;
+            if (state.timeSlot >= 3) {
+                state.timeSlot = 0;
+                state.day++;
+            }
+            
+            showScreen('game-screen');
+            updateBodyState();
+            renderGameScreen();
+            
+            let returnText = '<p>You came back.</p>';
+            returnText += '<p>The first thing you notice isn\'t guilt.</p>';
+            returnText += '<p>It\'s that the world moved on without you.</p>';
+            
+            const consequences = getConsequences();
+            if (consequences.length > 0) {
+                returnText += '<p style="margin-top: 1.5em; opacity: 0.7;">' + 
+                    consequences.join('</p><p style="opacity: 0.7;">') + '</p>';
+            }
+            
+            renderNarrative(returnText);
+            
+            if (state.day > 3) {
+                renderChoices([{ label: 'Continue', action: showEnding }]);
+            } else {
+                renderChoices([{ label: 'Continue', action: startTimeSlot }]);
+            }
+        }
+        
+        function getConsequences() {
+            const consequences = [];
+            const pool = [];
+            
+            if (state.relationshipStatus >= 1) {
+                pool.push('Unread message on phone: "A bit worried. Just let me know tomorrow."');
+                pool.push('Chat window frozen on your last message. Like a door left open.');
+            }
+            
+            if (state.workProgress < state.workRequired) {
+                pool.push('Document still open, but you don\'t remember where you stopped.');
+                pool.push(`Corner of screen: ${(3 - state.day) * 24 + (3 - state.timeSlot) * 8} hours until deadline.`);
+            }
+            
+            if (state.familyPressure > 0) {
+                pool.push('Missed call: Family. Throat tightens when you see the name.');
+            }
+            
+            pool.push('Faint burnt smell from the kitchen. Not strong, but enough to know: something happened while you were gone.');
+            pool.push('You find yourself sitting somewhere you don\'t remember getting to—room lights still on.');
+            pool.push('Light outside has changed. You don\'t know how long it\'s been.');
+            pool.push('Tea gone cold. You don\'t remember making it.');
+            
+            const count = Math.random() > 0.5 ? 2 : 1;
+            for (let i = 0; i < count && pool.length > 0; i++) {
+                const idx = Math.floor(Math.random() * pool.length);
+                consequences.push(pool.splice(idx, 1)[0]);
+            }
+            
+            return consequences;
+        }
+        
+        function startTimePassingDisplay() {
+            const display = document.getElementById('time-passing');
+            let minutes = 0;
+            
+            const interval = setInterval(() => {
+                if (!state.inDissociation) {
+                    clearInterval(interval);
+                    display.textContent = '';
+                    return;
+                }
+                minutes += Math.floor(Math.random() * 10) + 5;
+                display.textContent = `${minutes} minutes passed...`;
+            }, 1500);
+        }
+        
+        function renderDissociationChoices(choices) {
+            const container = document.getElementById('dissociation-choices');
+            container.innerHTML = '';
+            
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice';
+                btn.textContent = choice.label;
+                btn.style.animationDelay = `${0.8 + index * 0.15}s`;
+                
+                if (choice.prominent) btn.classList.add('prominent');
+                btn.onclick = choice.action;
+                
+                container.appendChild(btn);
+            });
+        }
+        
+        // ============================================
+        // ENDING
+        // ============================================
+        
+        function showEnding() {
+            showScreen('ending-screen');
+            document.body.className = '';
+            
+            let title, summary;
+            
+            const workDone = state.workProgress >= state.workRequired;
+            const relationshipOk = state.relationshipStatus >= 1;
+            const relationshipGood = state.relationshipStatus >= 2;
+            const manyDissociations = state.dissociationCount >= 3;
+            const someDissociations = state.dissociationCount >= 1;
+            
+            if (manyDissociations && state.energy <= 2) {
+                title = 'These three days felt like breathing underwater';
+                summary = 'You made it through. Not because it was easy. Because you kept trying to come back.';
+            } else if (workDone && relationshipGood && !manyDissociations) {
+                title = 'You made it';
+                summary = 'Work done. They\'re still here. You\'re still here. Not because you\'re fine—because you tried hard.';
+            } else if (workDone && relationshipGood) {
+                title = 'You made it, but tired';
+                summary = 'Work done. They\'re still here. But you know how hard this was.';
+            } else if (workDone && !relationshipOk) {
+                title = 'Submitted';
+                summary = 'Work is done. But something broke in these three days. You\'re not sure if it can be fixed.';
+            } else if (!workDone && relationshipGood) {
+                title = 'At least they\'re still here';
+                summary = 'Work unfinished. Consequences unknown. But you know you\'re not alone.';
+            } else if (!workDone && relationshipOk) {
+                title = 'Made it through';
+                summary = 'Work unfinished. Relationship barely intact. You survived. Rest can wait.';
+            } else if (state.relationshipStatus === 0) {
+                title = 'Something broke';
+                summary = 'Their messages stopped. Work is a mess. But you\'re still here. That\'s something.';
+            } else if (manyDissociations) {
+                title = 'You kept coming back';
+                summary = `These three days, you dissociated ${state.dissociationCount} times. Each time you tried to come back. That\'s what you did.`;
+            } else {
+                title = 'You survived';
+                summary = 'Not the best three days. But you\'re here. That\'s enough.';
+            }
+            
+            // 统计信息
+            let stats = [];
+            stats.push(`Dissociated ${state.dissociationCount} times`);
+            if (workDone) {
+                stats.push('Work completed');
+            } else {
+                stats.push(`Work progress: ${state.workProgress}/${state.workRequired}`);
+            }
+            if (relationshipGood) {
+                stats.push('Relationship in good place');
+            } else if (relationshipOk) {
+                stats.push('Relationship a bit distant');
+            } else {
+                stats.push('Relationship went cold');
+            }
+            // Family situation
+            if (state.familyPressure === 0) {
+                stats.push('Family stuff handled');
+            } else if (state.familyPressure >= 3) {
+                stats.push(`${state.familyPressure} missed calls from family`);
+            } else if (state.familyPressure >= 1) {
+                stats.push('Family stuff not fully handled');
+            }
+            if (state.anchors.breath.strength >= 2) stats.push('Breathing practice became familiar');
+            if (state.anchors.person.strength >= 2) stats.push('Found something to hold onto with them');
+            if (state.anchors.place.strength >= 1) stats.push('Found a safe place');
+            if (state.autopilotMode) stats.push('Activated autopilot mode');
+            
+            document.getElementById('ending-title').textContent = title;
+            document.getElementById('ending-summary').innerHTML = `
+                <p>${summary}</p>
+                <p style="margin-top: 20px; font-size: 13px; opacity: 0.6;">
+                    ${stats.join('<br>')}
+                </p>
+            `;
+        }
+        
+        // ============================================
+        // SAFE EXIT
+        // ============================================
+        
+        function showSafeExit() {
+            document.getElementById('safe-overlay').classList.add('active');
+        }
+        
+        function hideSafeExit() {
+            document.getElementById('safe-overlay').classList.remove('active');
+        }
+        
+        // ============================================
+        // INIT
+        // ============================================
+        
+        // Hide safe exit on title screen
+        document.getElementById('safe-exit').style.display = 'none';
+    </script>
+</body>
+</html>
